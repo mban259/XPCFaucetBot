@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.WebSocket;
 
-namespace XPFaucetBot.Events.VoiceChat
+namespace XPCFaucetBot.Events.VoiceChat
 {
     class VoiceChatMonitor
     {

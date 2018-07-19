@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using DotNetEnv;
 
-namespace XPFaucetBot.Utils
+namespace XPCFaucetBot.Utils
 {
     static class EnvManager
     {
