@@ -30,9 +30,19 @@ namespace XPCFaucetBot.Events.VoiceChat
                 if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
                 {
                     var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
-                    await textChannel.SendMessageAsync($"{arg1.Mention}さんいらっしゃい");
+                    var message = await textChannel.SendMessageAsync($"{arg1.Mention}さんいらっしゃい");
+                    Delete(message);
                 }
             }
         }
+
+        internal async void Delete(IUserMessage message)
+        {
+            Console.WriteLine(message.ToString());
+            await Task.Delay(20 * 1000);
+            await message.DeleteAsync();
+            Console.WriteLine("delete");
+        }
+
     }
 }
