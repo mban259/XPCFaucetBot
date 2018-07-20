@@ -25,9 +25,23 @@ namespace XPCFaucetBot.Events.VoiceChat
             {445948688578117632, 445948513809858560}
         };
 
+        private bool EqualVoiceChannel(SocketVoiceChannel x, SocketVoiceChannel y)
+        {
+            if (x == null)
+            {
+                if (y == null) throw new Exception();
+                else return false;
+            }
+            else
+            {
+                if (y == null) return false;
+                else return x.Equals(y);
+            }
+        }
+
         internal async Task UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
-            if (!arg2.VoiceChannel.Equals(arg3.VoiceChannel))
+            if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
             {
                 ulong textChannelId;
                 if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
