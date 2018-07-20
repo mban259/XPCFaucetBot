@@ -27,7 +27,7 @@ namespace XPCFaucetBot.Events.VoiceChat
 
         internal async Task UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
-            if (arg2.VoiceChannel != arg3.VoiceChannel)
+            if (!arg2.VoiceChannel.Equals(arg3.VoiceChannel))
             {
                 ulong textChannelId;
                 if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))

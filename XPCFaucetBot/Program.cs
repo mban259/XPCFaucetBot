@@ -11,11 +11,13 @@ namespace XPCFaucetBot
 {
     class Program
     {
+        
         private readonly DiscordSocketClient _discordSocketClient;
         private readonly VoiceChatMonitor _voiceChatMonitor;
 
         static void Main(string[] args)
         {
+
             var program = new Program();
             program.Awake();
             program.MainAsync().GetAwaiter().GetResult();
