@@ -41,13 +41,14 @@ namespace XPCFaucetBot.Events.VoiceChat
 
         internal async Task UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
+            if (arg1.Id == _discordSocketClient.CurrentUser.Id) return;
             if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
             {
                 ulong textChannelId;
                 if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
                 {
                     var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
-                    var m = Messages.VoiceChatJoinMessages[_random.Next(Messages.VoiceChatJoinMessages.Length)];
+                    var m = XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages[_random.Next(XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages.Length)];
                     var message = await textChannel.SendMessageAsync(string.Format(m, arg1.Mention));
                     Debug.Log($"send {string.Format(m, $"{arg1.Username}:{arg1.Mention}")} in {textChannel.Name}:{textChannel.Id}");
                     Delete(message);

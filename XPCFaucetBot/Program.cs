@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Audio;
 using Discord.WebSocket;
+using XPCFaucetBot.Events.Messages;
 using XPCFaucetBot.Events.VoiceChat;
 using XPCFaucetBot.Utils;
 
@@ -11,9 +14,10 @@ namespace XPCFaucetBot
 {
     class Program
     {
-        
+
         private readonly DiscordSocketClient _discordSocketClient;
         private readonly VoiceChatMonitor _voiceChatMonitor;
+        private readonly MessageMonitor _messageMonitor;
 
         static void Main(string[] args)
         {
@@ -27,6 +31,7 @@ namespace XPCFaucetBot
         {
             _discordSocketClient.UserVoiceStateUpdated += _voiceChatMonitor.UserVoiceStateUpdated;
             _discordSocketClient.Log += Log;
+            _discordSocketClient.MessageReceived += _messageMonitor.MessageReceived;
         }
 
         private Task Log(LogMessage arg)
@@ -46,6 +51,7 @@ namespace XPCFaucetBot
         {
             _discordSocketClient = new DiscordSocketClient();
             _voiceChatMonitor = new VoiceChatMonitor(_discordSocketClient);
+            _messageMonitor = new MessageMonitor(_discordSocketClient);
         }
     }
 }
