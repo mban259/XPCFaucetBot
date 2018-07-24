@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
@@ -32,6 +31,12 @@ namespace XPCFaucetBot
             _discordSocketClient.UserVoiceStateUpdated += _voiceChatMonitor.UserVoiceStateUpdated;
             _discordSocketClient.Log += Log;
             _discordSocketClient.MessageReceived += _messageMonitor.MessageReceived;
+            _discordSocketClient.Ready += Ready;
+        }
+
+        private async Task Ready()
+        {
+            Debug.Log($"{_discordSocketClient.CurrentUser.Username}:{_discordSocketClient.CurrentUser.Id}");
         }
 
         private Task Log(LogMessage arg)
