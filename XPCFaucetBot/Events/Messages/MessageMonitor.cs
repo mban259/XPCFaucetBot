@@ -14,16 +14,17 @@ namespace XPCFaucetBot.Events.Messages
     class MessageMonitor
     {
         private readonly DiscordSocketClient _discordSocketClient;
-        private const string SignCommand = "^!(xp) *message sign";
+        private const string SignCommand = "^!(?<name>(xp)) *message sign";
+        private readonly Regex _signMessageCommandRegex;
         internal MessageMonitor(DiscordSocketClient discordSocketClient)
         {
             _discordSocketClient = discordSocketClient;
+            _signMessageCommandRegex = new Regex(SignCommand);
         }
         internal async Task MessageReceived(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
             if (message.Author.Id == _discordSocketClient.CurrentUser.Id) return;
-
 
             var context = new CommandContext(_discordSocketClient, message);
 
@@ -35,11 +36,12 @@ namespace XPCFaucetBot.Events.Messages
                 return;
             }
 
-            var r = new Regex(SignCommand);
-            if (r.Match(message.ToString()).Success)
+            var match = _signMessageCommandRegex.Match(message.ToString());
+            if (match.Success)
             {
+                var currencyName = match.Groups["name"].Value;
                 Debug.Log($"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
-                await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText, message.Author.Mention));
+                await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText, message.Author.Mention, currencyName));
                 return;
             }
         }
