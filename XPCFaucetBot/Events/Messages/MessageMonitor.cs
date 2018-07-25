@@ -38,6 +38,7 @@ namespace XPCFaucetBot.Events.Messages
             var r = new Regex(SignCommand);
             if (r.Match(message.ToString()).Success)
             {
+                Debug.Log($"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
                 await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText, message.Author.Mention));
                 return;
             }
