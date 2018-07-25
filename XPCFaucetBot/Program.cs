@@ -41,7 +41,7 @@ namespace XPCFaucetBot
 
         private Task Log(LogMessage arg)
         {
-            Console.WriteLine(arg);
+            Debug.Log(arg.Message);
             return Task.CompletedTask;
         }
 
