@@ -14,7 +14,7 @@ namespace XPCFaucetBot.Events.Messages
     class MessageMonitor
     {
         private readonly DiscordSocketClient _discordSocketClient;
-        private const string SignCommand = "^!(xp) *message sign .+$";
+        private const string SignCommand = "^!(xp) *message sign";
         internal MessageMonitor(DiscordSocketClient discordSocketClient)
         {
             _discordSocketClient = discordSocketClient;
