@@ -27,6 +27,8 @@ namespace XPCFaucetBot.Events.Messages
             if (message.Author.Id == _discordSocketClient.CurrentUser.Id) return;
 
             var context = new CommandContext(_discordSocketClient, message);
+            int argPos = 0;
+            if (message.HasStringPrefix("./satoshi", ref argPos)) return;
 
             if (context.IsPrivate)
             {
