@@ -49,6 +49,7 @@ namespace XPCFaucetBot
         {
             await _discordSocketClient.LoginAsync(TokenType.Bot, EnvManager.DiscordToken);
             await _discordSocketClient.StartAsync();
+            await _messageMonitor.AddModulesAsync();
             await Task.Delay(-1);
         }
 

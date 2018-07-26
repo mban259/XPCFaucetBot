@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using Microsoft.Extensions.DependencyInjection;
 using XPCFaucetBot.Utils;
 
 namespace XPCFaucetBot.Events.Messages
@@ -17,11 +18,19 @@ namespace XPCFaucetBot.Events.Messages
         private readonly DiscordSocketClient _discordSocketClient;
         private const string SignCommand = "^!(?<name>(xp)) *message sign";
         private readonly Regex _signMessageCommandRegex;
-
+        private readonly IServiceProvider _serviceProvider;
+        private readonly CommandService _commandService;
         internal MessageMonitor(DiscordSocketClient discordSocketClient)
         {
             _discordSocketClient = discordSocketClient;
             _signMessageCommandRegex = new Regex(SignCommand);
+            _commandService = new CommandService();
+            _serviceProvider = new ServiceCollection().BuildServiceProvider();
+        }
+
+        internal async Task AddModulesAsync()
+        {
+            await _commandService.AddModulesAsync(Assembly.GetEntryAssembly());
         }
 
         internal async Task MessageReceived(SocketMessage messageParam)
@@ -31,7 +40,18 @@ namespace XPCFaucetBot.Events.Messages
 
             var context = new CommandContext(_discordSocketClient, message);
             int argPos = 0;
-            if (message.HasStringPrefix("./satoshi", ref argPos)) return;
+            if (message.HasStringPrefix(CommandString.Prefix, ref argPos))
+            {
+                var result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
+                if (result.IsSuccess)
+                {
+                    Debug.Log("success");
+                }
+                else
+                {
+                    Debug.Log(result.ErrorReason);
+                }
+            }
 
             if (context.IsPrivate)
             {

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Net.Http.Headers;
 using System.Text;
 
 namespace XPCFaucetBot.Utils
@@ -26,5 +28,28 @@ XPCに関する質問に関しては、<#447671198566973480>へお願いしま�
 ここで!{1} message signコマンドを打っても無効です。
 PCの場合、画面右側、ユーザー一覧から「CCWallet」を右クリックしてメッセージを選択すると、DMの画面に移ります。
 スマホの場合は、チャット画面を左にスワイプすればユーザー一覧が表示されますので、「CCWallet」をタップしてメッセージを選択してください。";
+
+        internal static readonly Dictionary<string, string> HelpMessages;
+        internal static readonly string MasterHelp;
+
+        static Messages()
+        {
+            HelpMessages = new Dictionary<string, string>();
+            Debug.Log("loadhelp");
+            foreach (var command in CommandString.Commands)
+            {
+                using (StreamReader sr = new StreamReader($"{command}.txt", Encoding.UTF8))
+                {
+                    Debug.Log($"load {command}.txt");
+                    HelpMessages[command] = sr.ReadToEnd();
+                }
+            }
+
+            using (StreamReader sr = new StreamReader("masterhelp.txt", Encoding.UTF8))
+            {
+                Debug.Log($"load masterhelp.txt");
+                MasterHelp = sr.ReadToEnd();
+            }
+        }
     }
 }
