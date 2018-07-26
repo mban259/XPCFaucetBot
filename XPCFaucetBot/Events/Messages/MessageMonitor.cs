@@ -51,6 +51,8 @@ namespace XPCFaucetBot.Events.Messages
                 {
                     Debug.Log(result.ErrorReason);
                 }
+
+                return;
             }
 
             if (context.IsPrivate)
