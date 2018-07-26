@@ -42,17 +42,24 @@ namespace XPCFaucetBot.Events.VoiceChat
         internal async Task UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
             if (arg1.Id == _discordSocketClient.CurrentUser.Id) return;
-            if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
+            if (arg3.VoiceChannel.Guild.Id == EnvManager.XpcJapanId)
             {
-                ulong textChannelId;
-                if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
+                #region for XPC-JP        
+                if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
                 {
-                    var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
-                    var m = XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages[_random.Next(XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages.Length)];
-                    var message = await textChannel.SendMessageAsync(string.Format(m, arg1.Mention));
-                    Debug.Log($"send {string.Format(m, $"{arg1.Username}:{arg1.Mention}")} in {textChannel.Name}:{textChannel.Id}");
-                    Delete(message);
+                    ulong textChannelId;
+                    if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
+                    {
+                        var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
+                        var m = XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages[
+                            _random.Next(XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages.Length)];
+                        var message = await textChannel.SendMessageAsync(string.Format(m, arg1.Mention));
+                        Debug.Log(
+                            $"send {string.Format(m, $"{arg1.Username}:{arg1.Mention}")} in {textChannel.Name}:{textChannel.Id}");
+                        Delete(message);
+                    }
                 }
+                #endregion
             }
         }
 

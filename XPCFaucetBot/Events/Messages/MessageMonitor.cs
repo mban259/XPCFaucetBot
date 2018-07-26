@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -16,11 +17,13 @@ namespace XPCFaucetBot.Events.Messages
         private readonly DiscordSocketClient _discordSocketClient;
         private const string SignCommand = "^!(?<name>(xp)) *message sign";
         private readonly Regex _signMessageCommandRegex;
+
         internal MessageMonitor(DiscordSocketClient discordSocketClient)
         {
             _discordSocketClient = discordSocketClient;
             _signMessageCommandRegex = new Regex(SignCommand);
         }
+
         internal async Task MessageReceived(SocketMessage messageParam)
         {
             var message = messageParam as SocketUserMessage;
@@ -32,20 +35,33 @@ namespace XPCFaucetBot.Events.Messages
 
             if (context.IsPrivate)
             {
-                await message.Author.SendMessageAsync(Utils.Messages.DirectMessageReturnText);
-                Debug.Log($"receivedDM user:{message.Author.Username} id:{message.Author.Id} text:{message.ToString()}");
-                Debug.SaveDM($"{DateTime.Now}: user:{message.Author.Username} id:{message.Author.Id} text:{message.ToString()}");
-                return;
-            }
+                #region forDirectMessage
 
-            var match = _signMessageCommandRegex.Match(message.ToString());
-            if (match.Success)
-            {
-                var currencyName = match.Groups["name"].Value;
-                Debug.Log($"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
-                await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText, message.Author.Mention, currencyName));
+                await message.Author.SendMessageAsync(Utils.Messages.DirectMessageReturnText);
+                Debug.Log(
+                    $"receivedDM user:{message.Author.Username} id:{message.Author.Id} text:{message.ToString()}");
+                Debug.SaveDM(
+                    $"{DateTime.Now}: user:{message.Author.Username} id:{message.Author.Id} text:{message.ToString()}");
                 return;
+
+                #endregion
+            }
+            var match = _signMessageCommandRegex.Match(message.ToString());
+            if (context.Guild.Id == EnvManager.XpcJapanId)
+            {
+                #region forXPC-JP
+                if (match.Success)
+                {
+                    var currencyName = match.Groups["name"].Value;
+                    Debug.Log(
+                        $"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
+                    await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText,
+                        message.Author.Mention, currencyName));
+                    return;
+                }
+                #endregion
             }
         }
+
     }
 }
