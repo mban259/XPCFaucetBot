@@ -23,7 +23,7 @@ namespace XPCFaucetBot.Events.Messages
         [Command(CommandString.Help)]
         public async Task Help(string command)
         {
-            if (!CommandString.Commands.Any(s => s == command)) return;
+            if (!JsonManager.Commands.Any(s => s == command)) return;
             await Context.Channel.SendMessageAsync($"{Context.User.Mention}\n```asciidoc\n{Utils.Messages.HelpMessages[command]}\n```");
         }
     }

@@ -17,14 +17,6 @@ namespace XPCFaucetBot.Events.VoiceChat
             _random = new Random();
         }
 
-        private readonly Dictionary<ulong, ulong> _channel = new Dictionary<ulong, ulong>()
-        {
-            {469520085162262528, 469148120824021003},
-            {443362672033923086, 445954353979981855},
-            {445954581441282048, 445954384111730690},
-            {445948688578117632, 445948513809858560}
-        };
-
         private bool EqualVoiceChannel(SocketVoiceChannel x, SocketVoiceChannel y)
         {
             if (x == null)
@@ -48,11 +40,11 @@ namespace XPCFaucetBot.Events.VoiceChat
                 if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
                 {
                     ulong textChannelId;
-                    if (_channel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
+                    if (JsonManager.VoiceChatToTextChannel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
                     {
                         var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
-                        var m = XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages[
-                            _random.Next(XPCFaucetBot.Utils.Messages.VoiceChatJoinMessages.Length)];
+                        var m = XPCFaucetBot.Utils.JsonManager.VoiceChatJoinMessages[
+                            _random.Next(XPCFaucetBot.Utils.JsonManager.VoiceChatJoinMessages.Length)];
                         var message = await textChannel.SendMessageAsync(string.Format(m, arg1.Mention));
                         Debug.Log(
                             $"send {string.Format(m, $"{arg1.Username}:{arg1.Mention}")} in {textChannel.Name}:{textChannel.Id}");

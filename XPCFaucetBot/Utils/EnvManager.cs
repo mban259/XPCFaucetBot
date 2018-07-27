@@ -8,11 +8,14 @@ namespace XPCFaucetBot.Utils
     static class EnvManager
     {
         internal static readonly string DiscordToken;
-        internal const ulong XpcJapanId = 443362672033923082;
+        internal static readonly ulong XpcJapanId;
+        internal static readonly ulong NotificationChannelId;
         static EnvManager()
         {
             Env.Load();
             DiscordToken = Env.GetString("DISCORD_TOKEN");
+            XpcJapanId = ulong.Parse(Env.GetString("XPC_JP_ID"));
+            NotificationChannelId = ulong.Parse(Env.GetString("NOTIFICATION_CHANNEL_ID"));
         }
     }
 }

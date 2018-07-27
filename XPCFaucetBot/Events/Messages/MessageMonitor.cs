@@ -16,7 +16,7 @@ namespace XPCFaucetBot.Events.Messages
     class MessageMonitor
     {
         private readonly DiscordSocketClient _discordSocketClient;
-        private const string SignCommand = "^!(?<name>(xp)) *message sign";
+        private const string SignCommand = "^!xp *message sign";
         private readonly Regex _signMessageCommandRegex;
         private readonly IServiceProvider _serviceProvider;
         private readonly CommandService _commandService;
@@ -39,25 +39,27 @@ namespace XPCFaucetBot.Events.Messages
             if (message.Author.Id == _discordSocketClient.CurrentUser.Id) return;
 
             var context = new CommandContext(_discordSocketClient, message);
-            int argPos = 0;
-            if (message.HasStringPrefix(CommandString.Prefix, ref argPos))
-            {
-                var result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
-                if (result.IsSuccess)
-                {
-                    Debug.Log("success");
-                }
-                else
-                {
-                    Debug.Log(result.ErrorReason);
-                }
 
-                return;
-            }
 
             if (context.IsPrivate)
             {
                 #region forDirectMessage
+
+                int argPos = 0;
+                if (message.HasStringPrefix(CommandString.Prefix, ref argPos))
+                {
+                    var result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
+                    if (result.IsSuccess)
+                    {
+                        Debug.Log("success");
+                    }
+                    else
+                    {
+                        Debug.Log(result.ErrorReason);
+                    }
+
+                    return;
+                }
 
                 await message.Author.SendMessageAsync(Utils.Messages.DirectMessageReturnText);
                 Debug.Log(
@@ -67,6 +69,7 @@ namespace XPCFaucetBot.Events.Messages
                 return;
 
                 #endregion
+                return;
             }
             var match = _signMessageCommandRegex.Match(message.ToString());
             if (context.Guild.Id == EnvManager.XpcJapanId)
@@ -74,14 +77,38 @@ namespace XPCFaucetBot.Events.Messages
                 #region forXPC-JP
                 if (match.Success)
                 {
-                    var currencyName = match.Groups["name"].Value;
-                    Debug.Log(
-                        $"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
-                    await message.Channel.SendMessageAsync(string.Format(Utils.Messages.SignMessageReturnText,
-                        message.Author.Mention, currencyName));
+                    Debug.Log($"signMessage user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
+                    await message.Channel.SendMessageAsync($"{message.Author.Mention} {Utils.Messages.SignMessageReturnText}");
+                    return;
+                }
+
+                int argPos = 0;
+                if (message.HasStringPrefix(CommandString.Prefix, ref argPos))
+                {
+                    var result = await _commandService.ExecuteAsync(context, argPos, _serviceProvider);
+                    if (result.IsSuccess)
+                    {
+                        Debug.Log("success");
+                    }
+                    else
+                    {
+                        Debug.Log(result.ErrorReason);
+                    }
+
+                    return;
+                }
+
+                if (message.MentionedUsers.Any(u => u.Id == _discordSocketClient.CurrentUser.Id))
+                {
+                    Debug.Log($"receiveMention user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
+                    var xpc = _discordSocketClient.GetGuild(EnvManager.XpcJapanId);
+                    var notificationChannel = xpc.GetTextChannel(EnvManager.NotificationChannelId);
+                    await notificationChannel.SendMessageAsync(
+                        $"{xpc.EveryoneRole.Mention} {message.Author.Mention}さんからメンションきたよ\nmessage:{message.ToString()}\nlink:https://discordapp.com/channels/{xpc.Id}/{message.Channel.Id}/{message.Id}");
                     return;
                 }
                 #endregion
+                return;
             }
         }
 
