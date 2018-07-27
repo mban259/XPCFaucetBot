@@ -24,9 +24,9 @@ namespace XPCFaucetBot.Utils
 
         static Debug()
         {
-            LogWriter = new StreamWriter("debug.log", true);
+            LogWriter = new StreamWriter("Data/debug.log", true);
             LogWriter.AutoFlush = true;
-            ReceiveDMWriter = new StreamWriter("receivedDM.log", true);
+            ReceiveDMWriter = new StreamWriter("Data/receivedDM.log", true);
             ReceiveDMWriter.AutoFlush = true;
         }
     }

@@ -17,7 +17,7 @@ namespace XPCFaucetBot.Utils
         internal static void ReloadVoiceChatJoinMessages()
         {
             string sJson;
-            using (StreamReader sr = new StreamReader("Messages/VoiceChatJoinMessages.json"))
+            using (StreamReader sr = new StreamReader("Data/Messages/VoiceChatJoinMessages.json"))
             {
                 sJson = sr.ReadToEnd();
             }
@@ -28,7 +28,7 @@ namespace XPCFaucetBot.Utils
         internal static void ReloadCommands()
         {
             string sJson;
-            using (StreamReader sr = new StreamReader("Commands.json"))
+            using (StreamReader sr = new StreamReader("Data/Commands.json"))
             {
                 sJson = sr.ReadToEnd();
             }
@@ -38,7 +38,7 @@ namespace XPCFaucetBot.Utils
         internal static void ReloadVoiceChatToTextChannel()
         {
             string sJson;
-            using (StreamReader sr = new StreamReader("Settings/VoiceChat.json"))
+            using (StreamReader sr = new StreamReader("Data/Settings/VoiceChat.json"))
             {
                 sJson = sr.ReadToEnd();
             }

@@ -16,12 +16,12 @@ namespace XPCFaucetBot.Utils
 
         internal static void ReloadMessages()
         {
-            using (StreamReader sr = new StreamReader("Messages/DirectMessageReturn.txt"))
+            using (StreamReader sr = new StreamReader("Data/Messages/DirectMessageReturn.txt"))
             {
                 DirectMessageReturnText = sr.ReadToEnd();
             }
 
-            using (StreamReader sr = new StreamReader("Messages/SignMessageReturn.txt"))
+            using (StreamReader sr = new StreamReader("Data/Messages/SignMessageReturn.txt"))
             {
                 SignMessageReturnText = sr.ReadToEnd();
             }
@@ -33,14 +33,14 @@ namespace XPCFaucetBot.Utils
             Debug.Log("loadhelp");
             foreach (var command in JsonManager.Commands)
             {
-                using (StreamReader sr = new StreamReader($"Help/{command}.txt", Encoding.UTF8))
+                using (StreamReader sr = new StreamReader($"Data/Help/{command}.txt", Encoding.UTF8))
                 {
                     Debug.Log($"load {command}.txt");
                     HelpMessages[command] = sr.ReadToEnd();
                 }
             }
 
-            using (StreamReader sr = new StreamReader("Help/masterhelp.txt", Encoding.UTF8))
+            using (StreamReader sr = new StreamReader("Data/Help/masterhelp.txt", Encoding.UTF8))
             {
                 Debug.Log($"load masterhelp.txt");
                 MasterHelp = sr.ReadToEnd();
