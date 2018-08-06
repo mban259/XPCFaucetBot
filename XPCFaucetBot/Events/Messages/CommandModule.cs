@@ -14,6 +14,12 @@ namespace XPCFaucetBot.Events.Messages
 {
     public class CommandModule : ModuleBase
     {
+        [Command("ping")]
+        public async Task Ping()
+        {
+            await Context.Channel.SendMessageAsync("pong");
+        }
+
         [Command(CommandString.Help)]
         public async Task Help()
         {

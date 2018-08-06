@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Discord;
@@ -34,9 +36,11 @@ namespace XPCFaucetBot
             _discordSocketClient.Ready += Ready;
         }
 
-        private async Task Ready()
+        private Task Ready()
         {
-            Debug.Log($"{_discordSocketClient.CurrentUser.Username}:{_discordSocketClient.CurrentUser.Id}");
+            Debug.Log($"{_discordSocketClient.CurrentUser.Username} {_discordSocketClient.CurrentUser.Id}");
+            Task.Run(_messageMonitor.FreeRoomMonitor);
+            return Task.CompletedTask;
         }
 
         private Task Log(LogMessage arg)

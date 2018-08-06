@@ -30,7 +30,7 @@ namespace XPCFaucetBot.Events.Messages
 
         internal async Task AddModulesAsync()
         {
-            await _commandService.AddModulesAsync(Assembly.GetEntryAssembly());
+            await _commandService.AddModulesAsync(Assembly.GetEntryAssembly(), _serviceProvider);
         }
 
         internal async Task MessageReceived(SocketMessage messageParam)
@@ -112,5 +112,158 @@ namespace XPCFaucetBot.Events.Messages
             }
         }
 
+        private DateTime NextMonday()
+        {
+            var today = DateTime.Today;
+            int diff;
+            if (today.DayOfWeek == DayOfWeek.Sunday)
+            {
+                diff = 1;
+            }
+            else
+            {
+                diff = DayOfWeek.Monday - today.DayOfWeek + 7;
+            }
+            return today.AddDays(diff);
+        }
+
+        internal async Task FreeRoomMonitor()
+        {
+            Debug.Log("Start FreeRoom Monitor");
+            var next = NextMonday();
+
+            while (true)
+            {
+                if (DateTime.Now >= next)
+                {
+                    Debug.Log("Check!!");
+                    var alertChannels = new List<SocketTextChannel>();
+                    var archiveChannels = new List<SocketTextChannel>();
+                    foreach (var freeRoomId in EnvManager.FreeRoomId)
+                    {
+                        var category = _discordSocketClient.GetChannel(freeRoomId) as SocketCategoryChannel;
+                        foreach (var socketGuildChannel in category.Channels)
+                        {
+                            if (socketGuildChannel is SocketTextChannel)
+                            {
+                                var textChannel = socketGuildChannel as SocketTextChannel;
+                                var state = await GetState(textChannel, next);
+                                switch (state)
+                                {
+                                    case State.Alert:
+                                    case State.Archive:
+                                        alertChannels.Add(textChannel);
+                                        break;
+                                }
+                            }
+
+                        }
+                    }
+
+                    foreach (var socketTextChannel in alertChannels)
+                    {
+                        await socketTextChannel.SendMessageAsync("先週に書き込みをしたユニークユーザーが5人未満でした");
+                    }
+
+                    foreach (var socketTextChannel in archiveChannels)
+                    {
+                        await socketTextChannel.ModifyAsync((p) =>
+                        {
+                            p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
+                        });
+                    }
+                    next = next.AddDays(7);
+                    Debug.Log($"next:{next}");
+                }
+                else
+                {
+                    await Task.Delay(1 * 1000);
+                }
+            }
+        }
+
+        internal async Task<State> GetState(SocketTextChannel channel, DateTime thisMonday)
+        {
+            DateTime lastMonday = thisMonday.AddDays(-7);
+            DateTime beforeLastMonday = lastMonday.AddDays(-7);
+            IMessage[] messages;
+            for (int i = 1; true; i++)
+            {
+                messages = await GetMessage(channel, i * 100);
+                if (messages.Length < i * 100)
+                {
+                    break;
+                }
+
+                if (messages.Min(m => m.Timestamp.DateTime) < beforeLastMonday)
+                {
+                    break;
+                }
+            }
+            Array.Sort(messages, (a, b) => -a.Timestamp.CompareTo(b.Timestamp));
+            HashSet<ulong> lastWeek = new HashSet<ulong>();
+            HashSet<ulong> beforeLastWeek = new HashSet<ulong>();
+            foreach (var message in messages)
+            {
+                if (message.Author.IsBot) continue;
+                if (lastMonday <= message.Timestamp.DateTime && message.Timestamp.DateTime < thisMonday)
+                {
+                    if (lastWeek.Add(message.Author.Id))
+                    {
+                        if (lastWeek.Count >= 5) return State.None;
+                    }
+                }
+                if (beforeLastMonday <= message.Timestamp.DateTime && message.Timestamp.DateTime < lastMonday)
+                {
+                    if (beforeLastWeek.Add(message.Author.Id))
+                    {
+                        if (beforeLastWeek.Count >= 5 && lastWeek.Count < 5) return State.Alert;
+                    }
+                }
+            }
+
+            if (lastWeek.Count >= 5)
+            {
+                return State.None;
+            }
+            else
+            {
+                if (beforeLastWeek.Count >= 5)
+                {
+                    return State.Alert;
+                }
+                else
+                {
+                    return State.Archive;
+                }
+            }
+        }
+
+        private async Task<IMessage[]> GetMessage(SocketTextChannel channel, int limit)
+        {
+            var messageArray = await channel.GetMessagesAsync(limit).ToArray();
+            int length = messageArray.Sum(m => m.Count);
+            var result = new IMessage[length];
+            int index = 0;
+            foreach (var readOnlyCollection in messageArray)
+            {
+                foreach (var message in readOnlyCollection)
+                {
+                    result[index] = message;
+                    index++;
+                }
+            }
+
+            return result;
+        }
+
+    }
+
+    enum State
+    {
+        None,
+        Alert,
+        Archive
     }
 }
+
