@@ -40,9 +40,9 @@ namespace XPCFaucetBot.Utils
                 }
             }
 
-            using (StreamReader sr = new StreamReader("Data/Help/masterhelp.txt", Encoding.UTF8))
+            using (StreamReader sr = new StreamReader("Data/Help/helplist.txt", Encoding.UTF8))
             {
-                Debug.Log($"load masterhelp.txt");
+                Debug.Log($"load helplist.txt");
                 MasterHelp = sr.ReadToEnd();
             }
         }
