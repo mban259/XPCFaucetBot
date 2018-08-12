@@ -98,7 +98,7 @@ namespace XPCFaucetBot.Events.Messages
                     return;
                 }
 
-                if (message.MentionedUsers.Any(u => u.Id == _discordSocketClient.CurrentUser.Id))
+                if (message.MentionedUsers.Any(u => u.Id == _discordSocketClient.CurrentUser.Id) || message.MentionedRoles.Any(r => r.Members.Any(m => m.Id == _discordSocketClient.CurrentUser.Id)))
                 {
                     Debug.Log($"receiveMention user:{message.Author.Username}:{message.Author.Id} message:{message.ToString()}:{message.Id}");
                     var xpc = _discordSocketClient.GetGuild(EnvManager.XpcJapanId);
@@ -131,7 +131,6 @@ namespace XPCFaucetBot.Events.Messages
         {
             Debug.Log("Start FreeRoom Monitor");
             var next = NextMonday();
-
             while (true)
             {
                 if (DateTime.Now >= next)
@@ -151,8 +150,10 @@ namespace XPCFaucetBot.Events.Messages
                                 switch (state)
                                 {
                                     case State.Alert:
-                                    case State.Archive:
                                         alertChannels.Add(textChannel);
+                                        break;
+                                    case State.Archive:
+                                        archiveChannels.Add(textChannel);
                                         break;
                                 }
                             }
@@ -222,21 +223,17 @@ namespace XPCFaucetBot.Events.Messages
                 }
             }
 
-            if (lastWeek.Count >= 5)
+            if (lastWeek.Count < 5 && beforeLastWeek.Count < 5 && channel.CreatedAt < beforeLastMonday)
             {
-                return State.None;
+                return State.Archive;
             }
-            else
+
+            if (lastWeek.Count < 5 && channel.CreatedAt.DateTime < lastMonday)
             {
-                if (beforeLastWeek.Count >= 5)
-                {
-                    return State.Alert;
-                }
-                else
-                {
-                    return State.Archive;
-                }
+                return State.Alert;
             }
+
+            return State.None;
         }
 
         private async Task<IMessage[]> GetMessage(SocketTextChannel channel, int limit)
