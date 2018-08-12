@@ -223,7 +223,7 @@ namespace XPCFaucetBot.Events.Messages
                 }
             }
 
-            if (lastWeek.Count < 5 && beforeLastWeek.Count < 5 && channel.CreatedAt < beforeLastMonday)
+            if (lastWeek.Count < 5 && beforeLastWeek.Count < 5 && channel.CreatedAt.DateTime < beforeLastMonday)
             {
                 return State.Archive;
             }
