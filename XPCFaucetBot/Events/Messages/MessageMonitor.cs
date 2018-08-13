@@ -136,47 +136,55 @@ namespace XPCFaucetBot.Events.Messages
                 if (DateTime.Now >= next)
                 {
                     Debug.Log("Check!!");
-                    var alertChannels = new List<SocketTextChannel>();
-                    var archiveChannels = new List<SocketTextChannel>();
-                    foreach (var freeRoomId in EnvManager.FreeRoomId)
+                    try
                     {
-                        var category = _discordSocketClient.GetChannel(freeRoomId) as SocketCategoryChannel;
-                        foreach (var socketGuildChannel in category.Channels)
+                        var alertChannels = new List<SocketTextChannel>();
+                        var archiveChannels = new List<SocketTextChannel>();
+                        foreach (var freeRoomId in EnvManager.FreeRoomId)
                         {
-                            if (socketGuildChannel is SocketTextChannel)
+                            var category = _discordSocketClient.GetChannel(freeRoomId) as SocketCategoryChannel;
+                            foreach (var socketGuildChannel in category.Channels)
                             {
-                                var textChannel = socketGuildChannel as SocketTextChannel;
-                                var state = await GetState(textChannel, next);
-                                switch (state)
+                                if (socketGuildChannel is SocketTextChannel)
                                 {
-                                    case State.Alert:
-                                        alertChannels.Add(textChannel);
-                                        break;
-                                    case State.Archive:
-                                        archiveChannels.Add(textChannel);
-                                        break;
+                                    var textChannel = socketGuildChannel as SocketTextChannel;
+                                    var state = await GetState(textChannel, next);
+                                    switch (state)
+                                    {
+                                        case State.Alert:
+                                            alertChannels.Add(textChannel);
+                                            break;
+                                        case State.Archive:
+                                            archiveChannels.Add(textChannel);
+                                            break;
+                                    }
                                 }
+
                             }
-
                         }
-                    }
 
-                    foreach (var socketTextChannel in alertChannels)
-                    {
-                        Debug.Log($"alert:{socketTextChannel.Name}");
-                        await socketTextChannel.SendMessageAsync("先週に書き込みをしたユニークユーザーが5人未満でした");
-                    }
-
-                    foreach (var socketTextChannel in archiveChannels)
-                    {
-                        Debug.Log($"archive:{socketTextChannel.Name}");
-                        await socketTextChannel.ModifyAsync((p) =>
+                        foreach (var socketTextChannel in alertChannels)
                         {
-                            p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
-                        });
+                            Debug.Log($"alert:{socketTextChannel.Name}");
+                            await socketTextChannel.SendMessageAsync("先週に書き込みをしたユニークユーザーが5人未満でした");
+                        }
+
+                        foreach (var socketTextChannel in archiveChannels)
+                        {
+                            Debug.Log($"archive:{socketTextChannel.Name}");
+                            await socketTextChannel.ModifyAsync((p) =>
+                            {
+                                p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
+                            });
+                        }
+
+                        next = next.AddDays(7);
+                        Debug.Log($"next:{next}");
                     }
-                    next = next.AddDays(7);
-                    Debug.Log($"next:{next}");
+                    catch (Exception e)
+                    {
+                        Debug.Log(e);
+                    }
                 }
                 else
                 {
