@@ -206,7 +206,7 @@ namespace XPCFaucetBot.Events.Messages
                     break;
                 }
 
-                if (messages.Min(m => m.Timestamp.DateTime) < beforeLastMonday)
+                if (messages.Min(m => m.Timestamp) < beforeLastMonday)
                 {
                     break;
                 }
@@ -217,14 +217,14 @@ namespace XPCFaucetBot.Events.Messages
             foreach (var message in messages)
             {
                 if (message.Author.IsBot) continue;
-                if (lastMonday <= message.Timestamp.DateTime && message.Timestamp.DateTime < thisMonday)
+                if (lastMonday <= message.Timestamp && message.Timestamp < thisMonday)
                 {
                     if (lastWeek.Add(message.Author.Id))
                     {
                         if (lastWeek.Count >= 5) return State.None;
                     }
                 }
-                if (beforeLastMonday <= message.Timestamp.DateTime && message.Timestamp.DateTime < lastMonday)
+                if (beforeLastMonday <= message.Timestamp && message.Timestamp < lastMonday)
                 {
                     if (beforeLastWeek.Add(message.Author.Id))
                     {
@@ -233,12 +233,12 @@ namespace XPCFaucetBot.Events.Messages
                 }
             }
 
-            if (lastWeek.Count < 5 && beforeLastWeek.Count < 5 && channel.CreatedAt.DateTime < beforeLastMonday)
+            if (lastWeek.Count < 5 && beforeLastWeek.Count < 5 && channel.CreatedAt < beforeLastMonday)
             {
                 return State.Archive;
             }
 
-            if (lastWeek.Count < 5 && channel.CreatedAt.DateTime < lastMonday)
+            if (lastWeek.Count < 5 && channel.CreatedAt < lastMonday)
             {
                 return State.Alert;
             }
