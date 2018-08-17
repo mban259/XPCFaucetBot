@@ -166,16 +166,30 @@ namespace XPCFaucetBot.Events.Messages
                         foreach (var socketTextChannel in alertChannels)
                         {
                             Debug.Log($"alert:{socketTextChannel.Name}");
-                            await socketTextChannel.SendMessageAsync("先週に書き込みをしたユニークユーザーが5人未満でした");
+                            try
+                            {
+                                await socketTextChannel.SendMessageAsync("先週に書き込みをしたユニークユーザーが5人未満でした");
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Log(e);
+                            }
                         }
 
                         foreach (var socketTextChannel in archiveChannels)
                         {
                             Debug.Log($"archive:{socketTextChannel.Name}");
-                            await socketTextChannel.ModifyAsync((p) =>
+                            try
                             {
-                                p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
-                            });
+                                await socketTextChannel.ModifyAsync((p) =>
+                                {
+                                    p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
+                                });
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Log(e);
+                            }
                         }
 
                         next = next.AddDays(7);
