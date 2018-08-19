@@ -178,9 +178,22 @@ namespace XPCFaucetBot.Events.Messages
 
                         foreach (var socketTextChannel in archiveChannels)
                         {
-                            Debug.Log($"archive:{socketTextChannel.Name}");
+                            Debug.Log($"alert_archive:{socketTextChannel.Name}");
                             try
                             {
+                                await socketTextChannel.SendMessageAsync("先週、先々週に書き込みをしたユニークユーザーが5人未満でした");
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.Log(e);
+                            }
+                        }
+
+                        foreach (var socketTextChannel in archiveChannels)
+                        {
+                            Debug.Log($"archive:{socketTextChannel.Name}");
+                            try
+                            {                        
                                 await socketTextChannel.ModifyAsync((p) =>
                                 {
                                     p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
