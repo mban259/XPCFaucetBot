@@ -20,6 +20,9 @@ namespace XPCFaucetBot.Events.Messages
         private readonly Regex _signMessageCommandRegex;
         private readonly IServiceProvider _serviceProvider;
         private readonly CommandService _commandService;
+        private object _lockObj = new object();
+        private bool _monitoring;
+
         internal MessageMonitor(DiscordSocketClient discordSocketClient)
         {
             _discordSocketClient = discordSocketClient;
@@ -129,8 +132,21 @@ namespace XPCFaucetBot.Events.Messages
 
         internal async Task FreeRoomMonitor()
         {
+            lock (_lockObj)
+            {
+                if (_monitoring)
+                {
+                    Debug.Log("already monitoring");
+                    return;
+                }
+
+                _monitoring = true;
+            }
+
             Debug.Log("Start FreeRoom Monitor");
             var next = NextMonday();
+
+
             while (true)
             {
                 if (DateTime.Now >= next)
@@ -189,28 +205,32 @@ namespace XPCFaucetBot.Events.Messages
                             }
                         }
 
-                        foreach (var socketTextChannel in archiveChannels)
-                        {
-                            Debug.Log($"archive:{socketTextChannel.Name}");
-                            try
-                            {                        
-                                await socketTextChannel.ModifyAsync((p) =>
-                                {
-                                    p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
-                                });
-                            }
-                            catch (Exception e)
-                            {
-                                Debug.Log(e);
-                            }
-                        }
+                        //foreach (var socketTextChannel in archiveChannels)
+                        //{
+                        //    Debug.Log($"archive:{socketTextChannel.Name}");
+                        //    try
+                        //    {                        
+                        //        await socketTextChannel.ModifyAsync((p) =>
+                        //        {
+                        //            p.CategoryId = new Optional<ulong?>(EnvManager.ArchiveId);
+                        //        });
+                        //    }
+                        //    catch (Exception e)
+                        //    {
+                        //        Debug.Log(e);
+                        //    }
+                        //}
 
-                        next = next.AddDays(7);
-                        Debug.Log($"next:{next}");
+
                     }
                     catch (Exception e)
                     {
                         Debug.Log(e);
+                    }
+                    finally
+                    {
+                        next = next.AddDays(7);
+                        Debug.Log($"next:{next}");
                     }
                 }
                 else

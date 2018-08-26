@@ -32,5 +32,68 @@ namespace XPCFaucetBot.Events.Messages
             if (!JsonManager.Commands.Any(s => s == command)) return;
             await Context.Channel.SendMessageAsync($"{Context.User.Mention}\n```asciidoc\n{Utils.Messages.HelpMessages[command]}\n```");
         }
+
+        #region for python irasshai
+        [Command("setvoice")]
+        public Task SetVoice(string name)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("setpitch")]
+        public Task SetPitch(string value)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("setrange")]
+        public Task SetRange(string value)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("setrate")]
+        public Task SetRate(string value)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("setvolume")]
+        public Task SetVolume(string value)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("settext")]
+        public Task SetText(params string[] text)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("setxml")]
+        public Task SetVoice(params string[] text)
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("reset")]
+        public Task Reset()
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("getvcsetting")]
+        public Task GetVCSetting()
+        {
+            return Task.CompletedTask;
+        }
+
+        [Command("say")]
+        public Task Say(params string[] text)
+        {
+            return Task.CompletedTask;
+        }
+
+        #endregion
     }
 }
