@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.IO;
+﻿using Discord.Commands;
 using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Threading.Tasks;
-using Discord;
-using Discord.Commands;
 using XPCFaucetBot.Utils;
 
 namespace XPCFaucetBot.Events.Messages
 {
     public class CommandModule : ModuleBase
     {
-        [Command("ping")]
+        [Command(CommandString.Ping)]
         public async Task Ping()
         {
             await Context.Channel.SendMessageAsync("pong");
@@ -23,77 +16,34 @@ namespace XPCFaucetBot.Events.Messages
         [Command(CommandString.Help)]
         public async Task Help()
         {
-            await Context.Channel.SendMessageAsync($"{Context.User.Mention}\n```asciidoc\n{Utils.Messages.MasterHelp}\n```");
+            await Context.Channel.SendMessageAsync($"{Context.User.Mention}\n```asciidoc\n{Utils.Messages.HelpList}\n```");
         }
 
         [Command(CommandString.Help)]
         public async Task Help(string command)
         {
-            if (!JsonManager.Commands.Any(s => s == command)) return;
+            if (!Settings.Commands.Any(s => s == command)) return;
             await Context.Channel.SendMessageAsync($"{Context.User.Mention}\n```asciidoc\n{Utils.Messages.HelpMessages[command]}\n```");
         }
 
-        #region for python irasshai
-        [Command("setvoice")]
-        public Task SetVoice(string name)
+        [Command(CommandString.WishList)]
+        public async Task WithList()
         {
-            return Task.CompletedTask;
+            await Context.Channel.SendMessageAsync(Utils.Messages.WishList);
         }
 
-        [Command("setpitch")]
-        public Task SetPitch(string value)
+        [Command(CommandString.Reload)]
+        public async Task Reload()
         {
-            return Task.CompletedTask;
-        }
 
-        [Command("setrange")]
-        public Task SetRange(string value)
-        {
-            return Task.CompletedTask;
+            if (Context.User.Id == Settings.AdminId)
+            {
+                await Context.Channel.SendMessageAsync("りろーど！");
+                Utils.Messages.ReloadHelp();
+                Utils.Messages.ReloadMessages();
+                Settings.LoadSettings();
+                await Context.Channel.SendMessageAsync("おわり!");
+            }
         }
-
-        [Command("setrate")]
-        public Task SetRate(string value)
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("setvolume")]
-        public Task SetVolume(string value)
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("settext")]
-        public Task SetText(params string[] text)
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("setxml")]
-        public Task SetVoice(params string[] text)
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("reset")]
-        public Task Reset()
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("getvcsetting")]
-        public Task GetVCSetting()
-        {
-            return Task.CompletedTask;
-        }
-
-        [Command("say")]
-        public Task Say(params string[] text)
-        {
-            return Task.CompletedTask;
-        }
-
-        #endregion
     }
 }

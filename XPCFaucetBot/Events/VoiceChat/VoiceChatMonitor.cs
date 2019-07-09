@@ -1,8 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Discord;
+﻿using Discord;
 using Discord.WebSocket;
+using System;
+using System.Threading.Tasks;
 using XPCFaucetBot.Utils;
 
 namespace XPCFaucetBot.Events.VoiceChat
@@ -17,7 +16,7 @@ namespace XPCFaucetBot.Events.VoiceChat
             _random = new Random();
         }
 
-        private bool EqualVoiceChannel(SocketVoiceChannel x, SocketVoiceChannel y)
+        private bool SameVoiceChannel(SocketVoiceChannel x, SocketVoiceChannel y)
         {
             if (x == null)
             {
@@ -33,29 +32,49 @@ namespace XPCFaucetBot.Events.VoiceChat
 
         internal async Task UserVoiceStateUpdated(SocketUser arg1, SocketVoiceState arg2, SocketVoiceState arg3)
         {
-            if (arg1.Id == _discordSocketClient.CurrentUser.Id) return;
-            if (arg3.VoiceChannel.Guild.Id == EnvManager.XpcJapanId)
+            try
             {
-                #region for XPC-JP        
-                if (!EqualVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
+                // 自分自身ならreturn
+                if (arg1.Id == _discordSocketClient.CurrentUser.Id)
+                    return;
+                // arg3のVoiceChannelがnull = VCから出た
+                // ならreturn
+                if (arg3.VoiceChannel == null)
+                    return;
+                if (arg3.VoiceChannel.Guild.Id == Settings.XpcJapanId)
                 {
-                    ulong textChannelId;
-                    if (JsonManager.VoiceChatToTextChannel.TryGetValue(arg3.VoiceChannel.Id, out textChannelId))
+                    #region for XPC-JP        
+                    if (!SameVoiceChannel(arg2.VoiceChannel, arg3.VoiceChannel))
                     {
-                        var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
-                        var m = XPCFaucetBot.Utils.JsonManager.VoiceChatJoinMessages[
-                            _random.Next(XPCFaucetBot.Utils.JsonManager.VoiceChatJoinMessages.Length)];
-                        var message = await textChannel.SendMessageAsync(string.Format(m, arg1.Mention));
-                        Debug.Log(
-                            $"send {string.Format(m, $"{arg1.Username}:{arg1.Mention}")} in {textChannel.Name}:{textChannel.Id}");
-                        Delete(message);
+                        await EnteredVC(arg1, arg3.VoiceChannel);
                     }
+                    #endregion
                 }
-                #endregion
+
+            }
+            catch (Exception e)
+            {
+                Debug.Log(e);
+                throw;
             }
         }
 
-        internal async void Delete(IUserMessage message)
+        private async Task EnteredVC(SocketUser user, SocketVoiceChannel voiceChannel)
+        {
+            ulong textChannelId;
+            if (Settings.VoiceChatToTextChannel.TryGetValue(voiceChannel.Id, out textChannelId))
+            {
+                var textChannel = _discordSocketClient.GetChannel(textChannelId) as SocketTextChannel;
+                var m = XPCFaucetBot.Utils.Settings.VoiceChatMessages[
+                    _random.Next(XPCFaucetBot.Utils.Settings.VoiceChatMessages.Length)];
+                var message = await textChannel.SendMessageAsync(string.Format(m, user.Mention));
+                Debug.Log(
+                    $"send {string.Format(m, $"{user.Username}:{user.Mention}")} in {textChannel.Name}:{textChannel.Id}");
+                var res = Task.Run(() => Delete(message));
+            }
+        }
+
+        internal async Task Delete(IUserMessage message)
         {
             await Task.Delay(20 * 1000);
             await message.DeleteAsync();

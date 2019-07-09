@@ -1,63 +1,55 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
-using System.Net.Http.Headers;
 using System.Text;
 
 namespace XPCFaucetBot.Utils
 {
     static class Messages
     {
-        internal static string DirectMessageReturnText;
-        internal static string SignMessageReturnText;
-
-        internal static Dictionary<string, string> HelpMessages;
-        internal static string MasterHelp;
-
+        public static string AnswerToDM;
+        public static Dictionary<string, string> HelpMessages;
+        public static string HelpList;
+        public static string WishList;
         internal static void ReloadMessages()
         {
-            using (StreamReader sr = new StreamReader("Data/Messages/DirectMessageReturn.txt"))
+            Debug.Log("load messages");
+            using (StreamReader sr = new StreamReader("data/messages/answertodm.txt"))
             {
-                DirectMessageReturnText = sr.ReadToEnd();
+                AnswerToDM = sr.ReadToEnd();
             }
 
-            using (StreamReader sr = new StreamReader("Data/Messages/SignMessageReturn.txt"))
+            using (StreamReader sr = new StreamReader("data/messages/wishlist.txt"))
             {
-                SignMessageReturnText = sr.ReadToEnd();
+                WishList = sr.ReadToEnd();
             }
+            Debug.Log("done");
         }
 
         internal static void ReloadHelp()
         {
             HelpMessages = new Dictionary<string, string>();
             Debug.Log("loadhelp");
-            foreach (var command in JsonManager.Commands)
+            foreach (var command in Settings.Commands)
             {
-                using (StreamReader sr = new StreamReader($"Data/Help/{command}.txt", Encoding.UTF8))
+                using (StreamReader sr = new StreamReader($"data/help/{command}.txt", Encoding.UTF8))
                 {
                     Debug.Log($"load {command}.txt");
                     HelpMessages[command] = sr.ReadToEnd();
                 }
             }
 
-            using (StreamReader sr = new StreamReader("Data/Help/helplist.txt", Encoding.UTF8))
+            using (StreamReader sr = new StreamReader("data/help/helplist.txt", Encoding.UTF8))
             {
                 Debug.Log($"load helplist.txt");
-                MasterHelp = sr.ReadToEnd();
+                HelpList = sr.ReadToEnd();
             }
+            Debug.Log("done");
         }
 
         static Messages()
         {
-            try
-            {
-                ReloadHelp();
-                ReloadMessages();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
+            ReloadHelp();
+            ReloadMessages();
         }
     }
 }

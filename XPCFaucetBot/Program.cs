@@ -15,31 +15,30 @@ namespace XPCFaucetBot
 {
     class Program
     {
-
-        private readonly DiscordSocketClient _discordSocketClient;
-        private readonly VoiceChatMonitor _voiceChatMonitor;
-        private readonly MessageMonitor _messageMonitor;
-
         static void Main(string[] args)
         {
-
-            var program = new Program();
-            program.Awake();
-            program.MainAsync().GetAwaiter().GetResult();
+            new Program().MainAsync().GetAwaiter().GetResult();
         }
 
-        internal void Awake()
+
+        public async Task MainAsync()
         {
-            _discordSocketClient.UserVoiceStateUpdated += _voiceChatMonitor.UserVoiceStateUpdated;
-            _discordSocketClient.Log += Log;
-            _discordSocketClient.MessageReceived += _messageMonitor.MessageReceived;
-            _discordSocketClient.Ready += Ready;
+            var client = new DiscordSocketClient();
+            var messageMonitor = new MessageMonitor(client);
+            var voiceChatMonitor = new VoiceChatMonitor(client);
+            client.Log += Log;
+            client.Ready += Ready;
+            client.MessageReceived += messageMonitor.MessageReceived;
+            client.UserVoiceStateUpdated += voiceChatMonitor.UserVoiceStateUpdated;
+            await messageMonitor.AddModulesAsync();
+            await client.LoginAsync(TokenType.Bot, Settings.DiscordToken);
+            await client.StartAsync();
+            await Task.Delay(-1);
         }
+
 
         private Task Ready()
         {
-            Debug.Log($"{_discordSocketClient.CurrentUser.Username} {_discordSocketClient.CurrentUser.Id}");
-            Task.Run(_messageMonitor.FreeRoomMonitor);
             return Task.CompletedTask;
         }
 
@@ -47,21 +46,6 @@ namespace XPCFaucetBot
         {
             Debug.Log(arg.Message);
             return Task.CompletedTask;
-        }
-
-        internal async Task MainAsync()
-        {
-            await _discordSocketClient.LoginAsync(TokenType.Bot, EnvManager.DiscordToken);
-            await _discordSocketClient.StartAsync();
-            await _messageMonitor.AddModulesAsync();
-            await Task.Delay(-1);
-        }
-
-        internal Program()
-        {
-            _discordSocketClient = new DiscordSocketClient();
-            _voiceChatMonitor = new VoiceChatMonitor(_discordSocketClient);
-            _messageMonitor = new MessageMonitor(_discordSocketClient);
         }
     }
 }

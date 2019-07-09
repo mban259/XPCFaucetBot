@@ -6,7 +6,10 @@ namespace XPCFaucetBot.Utils
 {
     class CommandString
     {
-        internal const string Prefix = "./satoshi ";
-        internal const string Help = "help";
+        public const string Prefix = "./satoshi ";
+        public const string Help = "help";
+        public const string WishList = "wishlist";
+        public const string Ping = "ping";
+        public const string Reload = "reload";
     }
 }
