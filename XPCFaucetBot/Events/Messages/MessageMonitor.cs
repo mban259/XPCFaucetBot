@@ -60,6 +60,7 @@ namespace XPCFaucetBot.Events.Messages
                 if (result.IsSuccess)
                 {
                     Debug.Log("success");
+                    return;
                 }
                 else
                 {
@@ -73,11 +74,6 @@ namespace XPCFaucetBot.Events.Messages
 
         private async Task GuildMessageReceived(SocketUserMessage message, CommandContext context)
         {
-            if (message.MentionedUsers.Any(u => u.Id == client.CurrentUser.Id) || message.MentionedRoles.Any(r => r.Members.Any(u => u.Id == client.CurrentUser.Id)))
-            {
-                await MentionReceived(message, context.Guild.Id, context.Channel.Id);
-                WriteGuildMessage(message, context);
-            }
             if (context.Guild.Id == Settings.XpcJapanId)
             {
                 #region XPC-JP
@@ -89,6 +85,7 @@ namespace XPCFaucetBot.Events.Messages
                     if (result.IsSuccess)
                     {
                         Debug.Log("success");
+                        return;
                     }
                     else
                     {
@@ -96,6 +93,11 @@ namespace XPCFaucetBot.Events.Messages
                     }
                 }
                 #endregion
+            }
+            if (message.MentionedUsers.Any(u => u.Id == client.CurrentUser.Id) || message.MentionedRoles.Any(r => r.Members.Any(u => u.Id == client.CurrentUser.Id)))
+            {
+                await MentionReceived(message, context.Guild.Id, context.Channel.Id);
+                WriteGuildMessage(message, context);
             }
         }
 
